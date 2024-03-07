@@ -7,3 +7,4 @@ annotations:
   tekton.dev/pipelines.minVersion: "0.41.0"
   tekton.dev/categories: containers
   tekton.dev/tags: containers
+  tekton.dev/source: https://github.com/Senjuti256/task-maven
