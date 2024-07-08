@@ -32,6 +32,16 @@ find_doc() {
     find docs/ -name "${task_name}*.md"
 }
 
+
+# New function to handle StepActions
+find_step_action_doc() {
+    declare step_action_name="${1}"
+    [[ "${step_action_name}" == "step-action-s2i"* ]] &&
+        step_action_name="step-action-s2i"
+    find docs/ -name "${step_action_name}*.md"
+}
+
+
 #
 # Main
 #
@@ -60,6 +70,37 @@ release() {
     echo "# Copying '${task_name}' documentation file '${task_doc}'..."
     cp -v -f ${task_doc} "${task_dir}/README.md" ||
         panic "Unable to copy '${task_doc}' into '${task_dir}'"
+
+
+    
+    # releasing all step action templates using the following glob expression
+    for s in $(ls -1 templates/step-action-*.yaml); do
+        declare step_action_name=$(extract_name ${s})
+        [[ -z "${step_action_name}" ]] &&
+            panic "Unable to extract StepAction name from '${s}'!"
+
+        declare step_action_doc="$(find_step_action_doc ${step_action_name})"
+        [[ -z "${step_action_doc}" ]] &&
+            panic "Unable to find documentation file for '${step_action_name}'!"
+
+        #declare step_action_dir="${RELEASE_DIR}/step-actions/${step_action_name}"
+        #[[ ! -d "${step_action_dir}" ]] &&
+         #   mkdir -p "${step_action_dir}"
+
+        # rendering the helm template for the specific file, using the resource name for the
+        # filename respectively
+        echo "# Rendering '${step_action_name}' at '${task_dir}'..."
+        helm template --show-only=${s} . >${task_dir}/${step_action_name}.yaml ||
+            panic "Unable to render '${s}'!"
+
+        # finds the respective documentation file copying as "README.md", on the same
+        # directory where the respective step action is located
+        echo "# Copying '${step_action_name}' documentation file '${step_action_doc}'..."
+        cp -v -f ${step_action_doc} "${task_dir}/README.md" ||
+            panic "Unable to copy '${step_action_doc}' into '${task_dir}'"
+    done
+
+    
 }
 
 release

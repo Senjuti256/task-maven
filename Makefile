@@ -46,7 +46,8 @@ endef
 $(BIN):
 	@mkdir -p $@
 
-CATALOGCD = $(or ${CATALOGCD_BIN},${CATALOGCD_BIN},$(BIN)/catalog-cd)
+#CATALOGCD = $(or ${CATALOGCD_BIN},${CATALOGCD_BIN},$(BIN)/catalog-cd)
+CATALOGCD = /home/sde/catalog-cd/catalog-cd
 $(BIN)/catalog-cd: $(BIN)
 	curl -fsL https://github.com/openshift-pipelines/catalog-cd/releases/download/v0.1.0/catalog-cd_0.1.0_linux_x86_64.tar.gz | tar xzf - -C $(BIN) catalog-cd
 
@@ -76,6 +77,7 @@ release: ${CATALOGCD} prepare-release
 			--output release \
 			--version $(CHART_VERSION) \
 			tasks/* \
+			step-actions/* \
 		; \
 	popd
 
